@@ -1,6 +1,6 @@
 123.123.123.123
 #10.103.6.0,24,bl,internal_net
-10.103.2.0/24,bl,internal_net
+10.103.2.0/24
 10.103.1.0,24,bl,internal_net
 # more entries
 10.0.0.2,32,bl,spam_sources
