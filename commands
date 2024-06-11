@@ -1,0 +1,1 @@
+while true; do dig app2.dp-demo.com @155.1.102.4 +time=1 +tries=1 | grep Query; sleep 0.5; done
